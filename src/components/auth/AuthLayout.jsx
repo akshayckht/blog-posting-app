@@ -1,7 +1,6 @@
 import { Box, Container, Paper, Stack } from "@mui/material";
 import { Logo } from "../common/Logo";
 
-
 export const AuthLayout = ({ children }) => {
   return (
     <Box
@@ -15,6 +14,7 @@ export const AuthLayout = ({ children }) => {
         py: 4,
       }}
     >
+     
       <Container maxWidth="sm">
         <Stack spacing={3} sx={{alignItems: "center"}}>
           <Logo />
