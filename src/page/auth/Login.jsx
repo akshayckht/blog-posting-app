@@ -175,6 +175,7 @@ export const Login = () => {
               type="submit"
               size="large"
               fullWidth
+              disabled={isSubmitting}
               sx={{
                 py: 1.4,
                 borderRadius: 2,
