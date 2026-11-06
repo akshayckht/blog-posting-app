@@ -86,7 +86,13 @@ export const Navbar = () => {
                 Explore
               </Button>
 
-              <Button component={NavLink} sx={{ textTransform: "none" }}>
+              <Button
+                component={NavLink}
+                to="/my-blogs"
+                sx={{
+                  "&.active": isActive,
+                }}
+              >
                 My Blogs
               </Button>
 

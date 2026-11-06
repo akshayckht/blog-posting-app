@@ -7,7 +7,10 @@ import "./index.css";
 import App from "./App.jsx";
 import { theme } from "./theme/theme.js";
 import { AuthContextProvider } from "./context/AuthContextProvider.jsx";
+import { app, db } from "./lib/firebase.js";
 
+console.log("Firebase project:", app.options.projectId);
+console.log("Firestore app:", db.app.options.projectId);
 
 
 
