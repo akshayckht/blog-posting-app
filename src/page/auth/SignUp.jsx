@@ -52,7 +52,7 @@ export const SignUp = () => {
       await registerUser({
         fullName: formData.fullName.trim(),
         email: formData.email.trim(),
-        password: formData.password.trim(),
+        password: formData.password
       });
 
       navigate("/login", { replace: true });

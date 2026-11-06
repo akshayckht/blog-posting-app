@@ -39,7 +39,7 @@ export const Navbar = () => {
       console.error("Sign out failed", error);
       setSignOutError("Unable to sign out. Please try again.");
     } finally {
-      isSigningOut(false);
+      setIsSigningOut(false);
     }
   };
 
@@ -111,6 +111,7 @@ export const Navbar = () => {
                 variant="outlined"
                 color="primary"
                 onClick={handleSignOut}
+                disabled={isSigningOut}
               >
                 Sign out
               </Button>
