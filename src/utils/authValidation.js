@@ -1,4 +1,4 @@
-const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\$/;
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 // const passwordPattern = /^(?=.*[A-Z])(?=.*[a-z])(?=.*[d])(?=.*[!@#$%^&*]).{8,}$/;
 
 //Login form validation
@@ -38,7 +38,7 @@ export const validateSignup = (formData) => {
   //password validation
   if (!formData.password) {
     errors.password = "Password required";
-  } else if (formData.password.length() < 8) {
+  } else if (formData.password.length < 8) {
     errors.password = "Password must contain at lest 8 characters";
   }
 

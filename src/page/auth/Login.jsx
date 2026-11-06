@@ -1,8 +1,17 @@
-import { Box, Button, Stack, TextField, Typography, Link } from "@mui/material";
+import {
+  Box,
+  Button,
+  Stack,
+  TextField,
+  Typography,
+  Link,
+  Alert,
+} from "@mui/material";
 import { AuthLayout } from "../../components/auth/AuthLayout";
 import { useState } from "react";
-import { Link as RouterLink } from "react-router";
+import { Link as RouterLink, useNavigate } from "react-router";
 import { validateLogin } from "../../utils/authValidation";
+import { loginUser } from "../../services/authService";
 
 export const Login = () => {
   const [formData, setFormData] = useState({
@@ -11,8 +20,12 @@ export const Login = () => {
   });
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [authError, setAuthError] = useState("");
 
-  const handleSubmit = (event) => {
+  const navigate = useNavigate();
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
     const validationErrors = validateLogin(formData);
@@ -28,7 +41,52 @@ export const Login = () => {
       return;
     }
 
-    //firebase login will be implemented
+    setIsSubmitting(true);
+
+    try {
+      await loginUser({
+        email: formData.email,
+        password: formData.password,
+      });
+
+      navigate("/posts", { replace: true });
+    } catch (error) {
+      console.log("Log in failed", error.code);
+
+      // 4. Handle Firebase errors
+      switch (error.code) {
+        case "auth/invalid-credential":
+        case "auth/wrong-password":
+        case "auth/user-not-found":
+          setAuthError("Invalid email or password.");
+          break;
+
+        case "auth/invalid-email":
+          setAuthError("Please enter a valid email address.");
+          break;
+
+        case "auth/user-disabled":
+          setAuthError("This account has been disabled.");
+          break;
+
+        case "auth/too-many-requests":
+          setAuthError("Too many attempts. Please try again later.");
+          break;
+
+        case "auth/network-request-failed":
+          setAuthError("Network error. Please check your connection.");
+          break;
+
+        case "auth/operation-not-allowed":
+          setAuthError("Email/password authentication is not enabled.");
+          break;
+
+        default:
+          setAuthError("Unable to sign in. Please try again.");
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (event) => {
@@ -40,10 +98,7 @@ export const Login = () => {
     });
 
     if (touched[name]) {
-      setErrors({
-        ...errors,
-        [name]: true,
-      });
+      setErrors(validateLogin(formData));
     }
   };
 
@@ -80,6 +135,9 @@ export const Login = () => {
         {/* login form */}
         <Box component="form" onSubmit={handleSubmit}>
           <Stack spacing={3}>
+            {/* auth errors */}
+            {authError && <Alert severity="error">{authError}</Alert>}
+
             <TextField
               id="email"
               name="email"
@@ -117,6 +175,7 @@ export const Login = () => {
               type="submit"
               size="large"
               fullWidth
+              disabled={isSubmitting}
               sx={{
                 py: 1.4,
                 borderRadius: 2,

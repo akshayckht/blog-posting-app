@@ -1,8 +1,17 @@
 import { useState } from "react";
 import { AuthLayout } from "../../components/auth/AuthLayout";
-import { Box, Stack, TextField, Typography, Link, Button } from "@mui/material";
-import { Link as RouterLink } from "react-router";
+import {
+  Box,
+  Stack,
+  TextField,
+  Typography,
+  Link,
+  Button,
+  Alert,
+} from "@mui/material";
+import { Link as RouterLink, useNavigate } from "react-router";
 import { validateSignup } from "../../utils/authValidation";
+import { registerUser } from "../../services/authService";
 
 export const SignUp = () => {
   const [formData, setFormData] = useState({
@@ -14,8 +23,12 @@ export const SignUp = () => {
 
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [authError, setAuthError] = useState("");
 
-  const handleSubmit = (event) => {
+  const navigate = useNavigate();
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
     const validationErrors = validateSignup(formData);
@@ -29,10 +42,46 @@ export const SignUp = () => {
       confirmPassword: true,
     });
 
-    if(Object.keys(validationErrors).length > 0){
+    if (Object.keys(validationErrors).length > 0) {
       return;
     }
 
+    setIsSubmitting(true);
+
+    try {
+      await registerUser({
+        fullName: formData.fullName.trim(),
+        email: formData.email.trim(),
+        password: formData.password
+      });
+
+      navigate("/login", { replace: true });
+    } catch (error) {
+      console.error("Registration failed", error);
+
+      switch (error.code) {
+        case "auth/email-already-in-use":
+          setAuthError("An account with email id already exist");
+          break;
+
+        case "auth/invalid-email":
+          setAuthError("Please enter a valid email address.");
+          break;
+
+        case "auth/weak-password":
+          setAuthError("Your password is too weak.");
+          break;
+
+        case "auth/network-request-failed":
+          setAuthError("Network error. Please try again.");
+          break;
+
+        default:
+          setAuthError("Unable to create your account. Please try again.");
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (event) => {
@@ -57,8 +106,6 @@ export const SignUp = () => {
     });
 
     setErrors(validateSignup(formData));
-
-    console.log(touched.fullName);
   };
 
   return (
@@ -83,6 +130,10 @@ export const SignUp = () => {
         <Box component="form" onSubmit={handleSubmit}>
           {/* create account form */}
           <Stack spacing={2.5}>
+
+            {/* auth alerts */}
+            {authError && <Alert severity="error">{authError}</Alert>}
+
             <TextField
               type="text"
               name="fullName"
@@ -144,13 +195,14 @@ export const SignUp = () => {
               type="submit"
               variant="contained"
               size="large"
+              disabled={isSubmitting}
               sx={{
                 py: 1.4,
                 borderRadius: 2,
                 textTransform: "none",
               }}
             >
-              Create account
+              {isSubmitting ? "Creating account..." : "Create Account"}
             </Button>
           </Stack>
         </Box>
